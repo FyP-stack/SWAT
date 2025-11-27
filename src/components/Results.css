@@ -1,0 +1,51 @@
+.results-root {
+  max-width: 1100px;
+  margin: 38px auto;
+  background: #f7fafd;
+  padding: 38px 44px 36px 44px;
+  border-radius: 20px;
+  box-shadow: 0 2px 13px #b3bbea22;
+}
+.results-metrics-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 38px;
+}
+.results-metric-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 19px 40px;
+  box-shadow: 0 1px 10px #b3b3c822;
+  font-size: 1.04rem;
+  color: #4890df;
+  font-weight: 700;
+  text-align: center;
+  min-width: 140px;
+}
+.results-metric-card span{
+  color:#b8c5e0; font-size:0.98rem;display:block;margin-bottom:8px;
+  font-weight: 400;
+}
+.results-visual-row {
+  display: flex;
+  gap: 56px;
+  margin-bottom: 38px;
+}
+.results-anomaly-list {
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 1px 10px #b3b3c822;
+  padding: 29px 22px;
+  font-size: 1.09rem;
+}
+.results-anomaly-list ul {
+  margin-top: 12px;
+  padding-left: 22px;
+}
+.results-anomaly-list li {
+  margin-bottom: 7px;
+  color:#333;
+}
+.results-loading{
+  color:#4890df;font-size:1.2rem;text-align:center;margin-top:40px;
+}
