@@ -1,7 +1,0 @@
-.rep-row { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
-.rep-card { background:#fff; border:1px solid #d6e9f4; border-radius:14px; padding:14px; box-shadow: 0 6px 24px rgba(24,39,75,.06); }
-.rep-title { font-weight:800; color:#0e4d61; margin-bottom:6px; }
-.rep-btn {
-  background: linear-gradient(95deg,#19b5dd,#11a0e0); color:#fff; border:none; border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer;
-  box-shadow: 0 8px 24px -10px rgba(25,181,221,.6);
-}

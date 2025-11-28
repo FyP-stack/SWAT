@@ -1,0 +1,298 @@
+/* App.css: Styles for SWaT Anomaly Detection Dashboard */
+
+body, html, #root, .App {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #0d1b3e 0%, #1a237e 50%, #0d1b3e 100%);
+  color: #f6f8fa;
+  font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+}
+
+/* Header */
+.App-header {
+  background: #23274d;
+  color: #7b82ea;
+  text-align: center;
+  padding: 38px 0 14px 0;
+  box-shadow: 0 2px 12px #0002;
+  z-index: 2;
+  border-bottom: 1px solid #171842;
+}
+
+.App-header h1 {
+  font-size: 2.3rem;
+  margin-bottom: 7px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.App-header p {
+  font-size: 1.12rem;
+  color: #a4aecb;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+}
+
+/* Main App Area */
+.App-main {
+  max-width: 1124px;
+  margin: 44px auto 0 auto;
+  padding: 0 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0px;
+  justify-content: center;
+  background: #23274d;
+  border-bottom: 2px solid #23263a;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  color: #d6daff;
+  font-size: 1.08rem;
+  padding: 19px 40px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.15s, color 0.2s;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tabs button.active {
+  color: #7b82ea;
+  border-bottom: 3px solid #7b82ea;
+  background: linear-gradient(90deg, #23263a 60%, #23274d 100%);
+}
+
+.tabs button:not(.active):hover {
+  background: #171842;
+  color: #9fa7fc;
+}
+
+.dashboard-root {
+  display: block;
+}
+.dashboard-sidebar {
+  /* Hide sidebar for App-level container for now */
+  display: none;
+}
+
+/* Responsive design */
+@media (max-width: 850px) {
+  .App-main {
+    max-width: 98vw;
+    padding: 0 2vw;
+  }
+  .tabs button {
+    padding: 17px 13vw;
+    font-size: 0.98rem;
+  }
+}
+
+/* Error message */
+.dashboard-error, .error-message {
+  color: #ff3860;
+  background: #2a1a1f;
+  border-radius: 7px;
+  padding: 9px 18px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  box-shadow: 0 1px 10px #0003;
+}
+
+/* Spinner for loading state */
+.loading .spinner {
+  margin: 0 auto 10px auto;
+  border: 4px solid #7b82ea33;
+  border-radius: 50%;
+  border-top: 4px solid #7b82ea;
+  width: 40px;
+  height: 40px;
+  animation: dashspin 1s linear infinite;
+}
+@keyframes dashspin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.loading p {
+  color: #7b82ea;
+  text-align: center;
+  font-size: 1.18rem;
+  margin-top: 7px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --water-blue: #00bcd4;
+  --water-light: #4dd0e1;
+  --water-dark: #0097a7;
+  --water-cyan: #00acc1;
+  --deep-ocean: #1a237e;
+  --ocean-dark: #0d1b3e;
+  --wave-light: rgba(77, 208, 225, 0.1);
+  --wave-medium: rgba(0, 188, 212, 0.2);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #0d1b3e 0%, #1a237e 50%, #0d1b3e 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.App {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Water Animation Background */
+.water-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.water-wave {
+  position: absolute;
+  bottom: -50px;
+  left: -50%;
+  width: 200%;
+  height: 200px;
+  background: radial-gradient(ellipse at center, rgba(0, 188, 212, 0.3) 0%, transparent 70%);
+  animation: wave 15s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+.water-wave:nth-child(2) {
+  animation: wave 18s ease-in-out infinite reverse;
+  animation-delay: -2s;
+  opacity: 0.4;
+}
+
+.water-wave:nth-child(3) {
+  animation: wave 20s ease-in-out infinite;
+  animation-delay: -4s;
+  opacity: 0.3;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(-25%) translateY(-10px);
+  }
+  50% {
+    transform: translateX(0) translateY(-20px);
+  }
+  75% {
+    transform: translateX(25%) translateY(-10px);
+  }
+}
+
+/* Bubbles Animation */
+.bubble {
+  position: absolute;
+  bottom: -100px;
+  background: radial-gradient(circle, rgba(77, 208, 225, 0.4) 0%, rgba(0, 188, 212, 0.1) 100%);
+  border-radius: 50%;
+  animation: rise 15s infinite ease-in;
+  opacity: 0;
+}
+
+@keyframes rise {
+  0% {
+    bottom: -100px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110vh;
+    opacity: 0;
+  }
+}
+
+/* Ripple Effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 188, 212, 0.3);
+  animation: ripple 3s ease-out infinite;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* Floating Particles */
+.water-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(77, 208, 225, 0.6);
+  border-radius: 50%;
+  animation: float 10s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-100vh) translateX(50px);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}

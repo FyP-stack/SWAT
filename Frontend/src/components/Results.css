@@ -1,0 +1,269 @@
+/* Results Component - Dark Theme */
+
+.results-root {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: transparent;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.results-heading {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.results-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.results-metric-card {
+  background: var(--dark-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-align: center;
+  min-width: 160px;
+  border: 1px solid var(--border-dark);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.results-metric-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 212, 255, 0.15);
+}
+
+.metric-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.metric-value {
+  color: var(--accent-cyan);
+  font-size: 24px;
+  font-weight: 700;
+  display: block;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.results-visual-row {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  grid-auto-flow: row;
+}
+
+@media (max-width: 1200px) {
+  .results-visual-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Anomaly Section */
+.results-anomaly-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.anomaly-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.anomaly-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.anomaly-item {
+  background: var(--dark-bg-card);
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.anomaly-item:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.1);
+}
+
+.anomaly-info {
+  display: flex;
+  gap: 32px;
+  flex: 1;
+}
+
+.anomaly-timestamp,
+.anomaly-value {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timestamp-label,
+.value-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.timestamp-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.value-number {
+  font-size: 14px;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.anomaly-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.anomaly-badge.attack {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+.anomaly-badge.normal {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+.no-anomalies {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 32px 0;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .results-root {
+    padding: 24px 16px;
+    gap: 24px;
+  }
+
+  .results-heading {
+    font-size: 22px;
+  }
+
+  .results-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .results-metric-card {
+    padding: 16px 12px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .results-visual-row {
+    gap: 24px;
+  }
+
+  .anomaly-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .anomaly-info {
+    gap: 24px;
+    width: 100%;
+  }
+
+  .anomaly-badge {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-root {
+    padding: 16px 12px;
+    gap: 20px;
+  }
+
+  .results-heading {
+    font-size: 18px;
+  }
+
+  .results-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .results-metric-card {
+    padding: 12px 8px;
+    gap: 6px;
+  }
+
+  .metric-label {
+    font-size: 10px;
+  }
+
+  .metric-value {
+    font-size: 18px;
+  }
+
+  .anomaly-heading {
+    font-size: 16px;
+  }
+
+  .anomaly-item {
+    padding: 12px 16px;
+  }
+
+  .anomaly-info {
+    gap: 16px;
+    flex-direction: column;
+  }
+}
