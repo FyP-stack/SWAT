@@ -280,17 +280,7 @@ export default function Auth({ mode }: AuthProps) {
         </div>
       </div>
 
-      {/* IMAGE SECTION */}
-      <div className="image-section">
-        <img
-          className="auth-image"
-          src={isLogin ? loginImage : signupImage}
-          alt="Technical visualization"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-        />
-      </div>
+
     </div>
   );
 }

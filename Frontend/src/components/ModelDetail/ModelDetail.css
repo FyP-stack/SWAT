@@ -444,3 +444,242 @@
   color: var(--accent-cyan);
   font-size: 1rem;
 }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-content {
+    padding: 32px 28px;
+    max-width: 100%;
+  }
+
+  .dashboard-title.water-gradient {
+    font-size: 1.8rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    padding: 28px 24px;
+  }
+
+  .dashboard-title.water-gradient {
+    font-size: 1.6rem;
+  }
+
+  .panel {
+    padding: 18px 20px 24px;
+  }
+
+  .panel-heading {
+    font-size: 16px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+
+  .action-row {
+    flex-direction: column;
+  }
+
+  .water-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 20px 16px;
+  }
+
+  .dashboard-breadcrumb {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .model-title-row {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-title.water-gradient {
+    font-size: 1.4rem;
+  }
+
+  .panel {
+    margin-bottom: 16px;
+    padding: 16px 18px 20px;
+  }
+
+  .panel-heading {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .panel-sub,
+  .panel-note {
+    font-size: 12px;
+  }
+
+  .meta-chips {
+    gap: 8px;
+  }
+
+  .chip {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .wf-drop {
+    padding: 20px 18px;
+  }
+
+  .wf-label {
+    font-size: 13px;
+  }
+
+  .wf-instruction {
+    font-size: 11px;
+  }
+
+  .water-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  .action-row {
+    gap: 10px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .metric-card {
+    padding: 12px 10px 14px;
+    min-height: 80px;
+  }
+
+  .metric-label {
+    font-size: 11px;
+  }
+
+  .metric-value {
+    font-size: 18px;
+  }
+
+  .error-banner {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content {
+    padding: 16px 12px;
+  }
+
+  .dashboard-breadcrumb {
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+
+  .model-title-row {
+    margin-bottom: 16px;
+  }
+
+  .dashboard-title.water-gradient {
+    font-size: 1.2rem;
+  }
+
+  .model-icon {
+    font-size: 0.95em;
+  }
+
+  .panel {
+    margin-bottom: 12px;
+    padding: 14px 16px 18px;
+  }
+
+  .panel-heading {
+    font-size: 14px;
+  }
+
+  .panel-sub,
+  .panel-note {
+    font-size: 11px;
+  }
+
+  .meta-chips {
+    gap: 6px;
+  }
+
+  .chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .chip span {
+    font-size: 9px;
+  }
+
+  .wf-drop {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+
+  .wf-label {
+    font-size: 12px;
+  }
+
+  .wf-instruction {
+    font-size: 10px;
+  }
+
+  .water-btn {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .action-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .water-btn {
+    width: 100%;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .metric-card {
+    padding: 10px 8px 12px;
+    min-height: 76px;
+  }
+
+  .metric-label {
+    font-size: 10px;
+  }
+
+  .metric-value {
+    font-size: 16px;
+  }
+
+  .error-banner {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .matrix-wrapper,
+  .curves-wrapper {
+    overflow-x: auto;
+  }
+}

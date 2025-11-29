@@ -10,3 +10,8 @@ python-multipart==0.0.9
 statsmodels
 scipy
 pmdarima
+sqlalchemy==2.0.27
+python-dotenv==1.0.1
+pydantic==2.5.0
+pyjwt
+email-validator==2.1.0

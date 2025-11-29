@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { apiService, EvaluationResult } from "../../services/api";
+import { saveEvaluation } from "../../services/api";
+import { useAuth } from "../../auth/AuthContext";
 import ConfusionMatrix from "../ConfusionMatrix";
 import Curves from "../Curves";
 import WaterFileUpload from "./WaterFileUpload";
@@ -57,6 +59,7 @@ function parseCSVPreview(file: File, maxRows = 40): Promise<CSVPreview> {
 
 export default function ModelDetail() {
   const { modelId = "" } = useParams();
+  const { user, isAuthed } = useAuth();
   const meta = useMemo(
     () => MODEL_META[modelId] ?? { name: modelId.replace(/_/g, ' '), icon: "🧪" },
     [modelId]
@@ -102,25 +105,42 @@ export default function ModelDetail() {
   };
 
   const handleEvaluate = async () => {
-    if (!file) { 
-      setError("Select a file first."); 
-      return; 
+    if (!file) {
+      setError("Select a file first.");
+      return;
     }
-    if (!uploaded) { 
-      setError("Click Upload before Evaluate."); 
-      return; 
+    if (!uploaded) {
+      setError("Click Upload before Evaluate.");
+      return;
     }
-    setLoading("eval"); 
-    setError(""); 
+    setLoading("eval");
+    setError("");
     setResult(null);
-    
+
     try {
       const data = await apiService.evaluateModel(file, modelId, "Normal/Attack", "Attack");
       setResult(data);
-    } catch (e: any) { 
-      setError(e?.message || "Evaluation failed"); 
-    } finally { 
-      setLoading("idle"); 
+
+      // Save to database if authenticated and successful
+      if (isAuthed && !data.error) {
+        try {
+          const token = localStorage.getItem('swat.token') || '';
+          await saveEvaluation(
+            token,
+            data,
+            file.name,
+            `Evaluation of ${modelId} on ${file.name} at ${new Date().toISOString()}`
+          );
+          console.log('Evaluation saved to database');
+        } catch (saveErr: any) {
+          console.warn('Failed to save evaluation to database:', saveErr);
+          // Don't show error to user for save failure, evaluation still successful
+        }
+      }
+    } catch (e: any) {
+      setError(e?.message || "Evaluation failed");
+    } finally {
+      setLoading("idle");
     }
   };
 
@@ -203,42 +223,6 @@ export default function ModelDetail() {
           </div>
 
           {error && <div className="error-banner">{error}</div>}
-
-          <div className="preview-block">
-            <h4>Preview</h4>
-            {!preview && <div className="panel-note">No preview yet. Upload to preview.</div>}
-
-            {preview && preview.headers.length > 0 && (
-              <>
-                {preview.labelGuess && preview.labelCounts && (
-                  <div className="label-dist">
-                    <div className="ld-tag">Detected label: <b>{preview.labelGuess}</b></div>
-                    <div className="ld-pills">
-                      {Object.entries(preview.labelCounts).map(([k,v]) => (
-                        <div key={k} className="pill">{k}: {v}</div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="preview-table-holder">
-                  <table>
-                    <thead>
-                      <tr>{preview.headers.map((h,i) => <th key={i}>{h}</th>)}</tr>
-                    </thead>
-                    <tbody>
-                      {preview.rows.map((r,ri) => (
-                        <tr key={ri}>{r.map((c,ci) => <td key={ci}>{c}</td>)}</tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-
-            {preview && preview.headers.length === 0 && (
-              <div className="panel-note">Preview not available client-side for this format. Proceed to Evaluate.</div>
-            )}
-          </div>
         </section>
 
         <section className={`panel slide-in ${panelsReady ? "in" : ""}`} style={{ animationDelay: "80ms" }}>

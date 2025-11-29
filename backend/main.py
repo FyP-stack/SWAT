@@ -12,12 +12,25 @@ import json
 import math
 import numpy as np
 import pandas as pd
-import secrets
+
+from sqlalchemy.orm import Session
+from datetime import timedelta
 
 from utils.io import stream_save_upload
 from utils.metrics import calculate_metrics, calculate_curves
 from utils.model_loader import load_model_by_name
 from fast_inference import fast_infer_cached
+from database import engine, get_db, Base, User, Evaluation
+from auth_utils import (
+    hash_password, verify_password, create_access_token, 
+    decode_token, authenticate_user, create_user, validate_password_strength
+)
+from schemas import (
+    UserLogin, UserCreate, UserResponse, TokenResponse, PasswordValidationResponse
+)
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SWaT Anomaly Detection API (Differentiated Models)", version="3.2.0")
 
@@ -39,15 +52,6 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 _MODEL_CACHE: Dict[str, Any] = {}
-
-# Auth storage (in-memory for demo)
-_USERS: Dict[str, str] = {}  # email -> hashed_password
-_SESSIONS: Dict[str, str] = {}  # token -> email
-
-# Initialize permanent admin user
-ADMIN_EMAIL = "admin@swat.local"
-ADMIN_PASSWORD = "admin123"  # Default password - change in production
-_USERS[ADMIN_EMAIL] = hashlib.sha256(ADMIN_PASSWORD.encode()).hexdigest()
 
 # Per-model default thresholds (tune these to produce different metrics)
 MODEL_DEFAULT_THRESHOLDS: Dict[str, float] = {
@@ -83,6 +87,27 @@ def _hash_obj(obj) -> str:
         except Exception:
             return "unhashable"
 
+def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+) -> User:
+    """Get current authenticated user from JWT token"""
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        email = decode_token(credentials.credentials)
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=401, detail="User not found or inactive")
+    
+    return user
+
 @app.get("/")
 async def root():
     return {"message": "SWaT API running with differentiated models"}
@@ -91,34 +116,79 @@ async def root():
 def health():
     return {"status": "ok", "models_cached": len(_MODEL_CACHE)}
 
-# Auth endpoints
-@app.post("/auth/login")
-async def login(email: str = Form(...), password: str = Form(...)):
-    if email not in _USERS or _USERS[email] != hashlib.sha256(password.encode()).hexdigest():
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = secrets.token_urlsafe(32)
-    _SESSIONS[token] = email
-    return {"token": token, "user": {"email": email}}
+# ==================== Authentication Endpoints ====================
 
-@app.post("/auth/signup")
-async def signup(email: str = Form(...), password: str = Form(...)):
-    if email in _USERS:
-        return JSONResponse(status_code=400, content={"detail": "User already exists"})
-    _USERS[email] = hashlib.sha256(password.encode()).hexdigest()
-    return {"message": "User created"}
+@app.post("/auth/signup", response_model=TokenResponse)
+async def signup(user_data: UserCreate, db: Session = Depends(get_db)):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate password strength
+    is_valid, message = validate_password_strength(user_data.password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=message)
+    
+    # Create user with error handling
+    try:
+        new_user = create_user(db, user_data.email, user_data.password, user_data.full_name)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
+    
+    # Create access token
+    access_token = create_access_token(new_user.email)
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": UserResponse.from_orm(new_user),
+        "expires_in": 60 * 60 * 24 * 7  # 7 days
+    }
+
+@app.post("/auth/login", response_model=TokenResponse)
+async def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    """Login user"""
+    user = authenticate_user(db, credentials.email, credentials.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    access_token = create_access_token(user.email)
+
+    # Try to commit the last_login update, but don't fail if it times out
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        # Still return success - authentication passed
+        # The last_login update is non-critical
+        import logging
+        logging.warning(f"Could not update last_login: {str(e)}")
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": UserResponse.from_orm(user),
+        "expires_in": 60 * 60 * 24 * 7  # 7 days
+    }
 
 @app.post("/auth/logout")
-async def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if credentials and credentials.credentials in _SESSIONS:
-        del _SESSIONS[credentials.credentials]
-    return {"message": "Logged out"}
+async def logout(current_user: User = Depends(get_current_user)):
+    """Logout user (token invalidation handled client-side)"""
+    return {"message": "Logged out successfully"}
 
-@app.get("/auth/me")
-async def me(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if not credentials or credentials.credentials not in _SESSIONS:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    email = _SESSIONS[credentials.credentials]
-    return {"user": {"email": email}}
+@app.get("/auth/me", response_model=UserResponse)
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
+    return UserResponse.from_orm(current_user)
+
+@app.post("/auth/validate-password", response_model=PasswordValidationResponse)
+async def validate_password(password: str = Form(...)):
+    """Validate password strength"""
+    is_valid, message = validate_password_strength(password)
+    return {"is_valid": is_valid, "message": message}
 
 @app.get("/api/models")
 async def list_models():
@@ -642,3 +712,217 @@ async def prefilter_endpoint(file: UploadFile = File(...), downsample: str = For
             dest.unlink(missing_ok=True)
         except Exception:
             pass
+
+# ==================== Evaluation Storage Endpoints ====================
+
+@app.post("/api/save-evaluation")
+async def save_evaluation(
+    current_user: User = Depends(get_current_user),
+    model_name: str = Form(...),
+    model_type: str = Form(None),
+    accuracy: float = Form(...),
+    precision: float = Form(...),
+    recall: float = Form(...),
+    f1_score: float = Form(...),
+    threshold_used: float = Form(None),
+    confusion_matrix: str = Form(None),
+    class_labels: str = Form(None),
+    curves_data: str = Form(None),
+    n_samples: int = Form(None),
+    n_anomalies: int = Form(None),
+    file_name: str = Form(None),
+    raw_score_summary: str = Form(None),
+    evaluation_notes: str = Form(None),
+    db: Session = Depends(get_db)
+):
+    """Save evaluation results to database"""
+    try:
+        # Parse JSON strings
+        cm = json.loads(confusion_matrix) if confusion_matrix else None
+        labels = json.loads(class_labels) if class_labels else None
+        curves = json.loads(curves_data) if curves_data else None
+        score_summary = json.loads(raw_score_summary) if raw_score_summary else None
+        
+        evaluation = Evaluation(
+            user_id=current_user.id,
+            model_name=model_name,
+            model_type=model_type,
+            accuracy=accuracy,
+            precision=precision,
+            recall=recall,
+            f1_score=f1_score,
+            threshold_used=threshold_used,
+            confusion_matrix=cm,
+            class_labels=labels,
+            curves_data=curves,
+            n_samples=n_samples,
+            n_anomalies=n_anomalies,
+            file_name=file_name,
+            raw_score_summary=score_summary,
+            evaluation_notes=evaluation_notes
+        )
+        
+        db.add(evaluation)
+        db.commit()
+        db.refresh(evaluation)
+        
+        return {
+            "success": True,
+            "evaluation_id": evaluation.id,
+            "message": "Evaluation saved successfully"
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save evaluation: {str(e)}")
+
+@app.get("/api/evaluations")
+async def get_evaluations(
+    current_user: User = Depends(get_current_user),
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db)
+):
+    """Get all evaluations for current user"""
+    try:
+        evaluations = db.query(Evaluation).filter(
+            Evaluation.user_id == current_user.id
+        ).order_by(Evaluation.created_at.desc()).offset(offset).limit(limit).all()
+        
+        total = db.query(Evaluation).filter(
+            Evaluation.user_id == current_user.id
+        ).count()
+        
+        return {
+            "evaluations": [
+                {
+                    "id": e.id,
+                    "model_name": e.model_name,
+                    "model_type": e.model_type,
+                    "accuracy": e.accuracy,
+                    "precision": e.precision,
+                    "recall": e.recall,
+                    "f1_score": e.f1_score,
+                    "threshold_used": e.threshold_used,
+                    "n_samples": e.n_samples,
+                    "n_anomalies": e.n_anomalies,
+                    "file_name": e.file_name,
+                    "created_at": e.created_at.isoformat(),
+                    "updated_at": e.updated_at.isoformat()
+                }
+                for e in evaluations
+            ],
+            "total": total,
+            "limit": limit,
+            "offset": offset
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch evaluations: {str(e)}")
+
+@app.get("/api/evaluations/{evaluation_id}")
+async def get_evaluation(
+    evaluation_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get detailed evaluation by ID"""
+    try:
+        evaluation = db.query(Evaluation).filter(
+            Evaluation.id == evaluation_id,
+            Evaluation.user_id == current_user.id
+        ).first()
+        
+        if not evaluation:
+            raise HTTPException(status_code=404, detail="Evaluation not found")
+        
+        return {
+            "id": evaluation.id,
+            "model_name": evaluation.model_name,
+            "model_type": evaluation.model_type,
+            "accuracy": evaluation.accuracy,
+            "precision": evaluation.precision,
+            "recall": evaluation.recall,
+            "f1_score": evaluation.f1_score,
+            "threshold_used": evaluation.threshold_used,
+            "confusion_matrix": evaluation.confusion_matrix,
+            "class_labels": evaluation.class_labels,
+            "curves_data": evaluation.curves_data,
+            "n_samples": evaluation.n_samples,
+            "n_anomalies": evaluation.n_anomalies,
+            "file_name": evaluation.file_name,
+            "raw_score_summary": evaluation.raw_score_summary,
+            "evaluation_notes": evaluation.evaluation_notes,
+            "created_at": evaluation.created_at.isoformat(),
+            "updated_at": evaluation.updated_at.isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch evaluation: {str(e)}")
+
+@app.delete("/api/evaluations/{evaluation_id}")
+async def delete_evaluation(
+    evaluation_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete evaluation"""
+    try:
+        evaluation = db.query(Evaluation).filter(
+            Evaluation.id == evaluation_id,
+            Evaluation.user_id == current_user.id
+        ).first()
+        
+        if not evaluation:
+            raise HTTPException(status_code=404, detail="Evaluation not found")
+        
+        db.delete(evaluation)
+        db.commit()
+        
+        return {"success": True, "message": "Evaluation deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete evaluation: {str(e)}")
+
+@app.get("/api/evaluations/stats/summary")
+async def get_evaluation_stats(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get evaluation statistics summary"""
+    try:
+        evaluations = db.query(Evaluation).filter(
+            Evaluation.user_id == current_user.id
+        ).all()
+        
+        if not evaluations:
+            return {
+                "total_evaluations": 0,
+                "average_f1": 0,
+                "average_accuracy": 0,
+                "best_f1_model": None,
+                "most_used_model": None
+            }
+        
+        f1_scores = [e.f1_score for e in evaluations if e.f1_score is not None]
+        accuracies = [e.accuracy for e in evaluations if e.accuracy is not None]
+        
+        best_eval = max(evaluations, key=lambda e: e.f1_score or 0)
+        model_counts = {}
+        for e in evaluations:
+            model_counts[e.model_name] = model_counts.get(e.model_name, 0) + 1
+        
+        most_used = max(model_counts.items(), key=lambda x: x[1])[0] if model_counts else None
+        
+        return {
+            "total_evaluations": len(evaluations),
+            "average_f1": float(np.mean(f1_scores)) if f1_scores else 0,
+            "average_accuracy": float(np.mean(accuracies)) if accuracies else 0,
+            "best_f1_score": float(best_eval.f1_score) if best_eval.f1_score else 0,
+            "best_f1_model": best_eval.model_name,
+            "most_used_model": most_used,
+            "model_usage_count": model_counts
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")

@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const performAutoLogin = async () => {
       try {
         const response = await authApi.login(ADMIN_EMAIL, ADMIN_PASSWORD);
-        localStorage.setItem(TOKEN_KEY, response.token);
+        localStorage.setItem(TOKEN_KEY, response.access_token);
         setUser(response.user);
       } catch (err) {
         console.error('Auto-login failed:', err);
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login(email, password);
-      localStorage.setItem(TOKEN_KEY, response.token);
+      localStorage.setItem(TOKEN_KEY, response.access_token);
       setUser(response.user);
     } catch (err) {
       throw err;

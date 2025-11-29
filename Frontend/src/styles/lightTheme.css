@@ -1,50 +1,58 @@
-/* Dark Theme Foundation - SWaT Dashboard */
+/* Light Theme Foundation - SWaT Dashboard */
 
 :root {
-  /* Dark Background Colors */
-  --dark-bg-primary: #0f0f1e;
-  --dark-bg-secondary: #1a1a2e;
-  --dark-bg-tertiary: #23254e;
-  --dark-bg-card: #16173b;
+  /* Light Background Colors */
+  --light-bg-primary: #ffffff;
+  --light-bg-secondary: #f5f7fb;
+  --light-bg-tertiary: #eef1f8;
+  --light-bg-card: #ffffff;
   
-  /* Accent Colors */
-  --accent-cyan: #00d4ff;
-  --accent-cyan-light: #4dd9ff;
-  --accent-cyan-dark: #0099cc;
-  --accent-blue: #6366ff;
-  --accent-blue-light: #818cf8;
-  --accent-purple: #a855f7;
-  --accent-red: #ef4444;
-  --accent-green: #22c55e;
+  /* Accent Colors - Professional Blue */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #3b82f6;
+  --accent-blue-dark: #1e40af;
+  --accent-blue-pale: #eff6ff;
+  --accent-cyan: #0891b2;
+  --accent-cyan-light: #06b6d4;
+  --accent-cyan-pale: #ecf0ff;
+  --accent-purple: #7c3aed;
+  --accent-red: #dc2626;
+  --accent-green: #16a34a;
   
   /* Text Colors */
-  --text-primary: #f0f0f0;
-  --text-secondary: #b0b0b0;
-  --text-tertiary: #808080;
-  --text-muted: #606080;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --text-muted: #9ca3af;
   
   /* Status Colors */
-  --success-color: #22c55e;
+  --success-color: #16a34a;
   --success-light: #dcfce7;
-  --error-color: #ef4444;
+  --error-color: #dc2626;
   --error-light: #fee2e2;
-  --warning-color: #f59e0b;
+  --warning-color: #d97706;
   --warning-light: #fef3c7;
-  --info-color: #3b82f6;
+  --info-color: #2563eb;
   --info-light: #dbeafe;
   
   /* Border Colors */
-  --border-dark: #2a2a45;
-  --border-light: #3a3a55;
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --border-dark: #b3bcc4;
+  
+  /* Shadow */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
   /* Chart Colors */
-  --chart-line-1: #00d4ff;
-  --chart-line-2: #ef4444;
-  --chart-line-3: #22c55e;
-  --chart-grid: rgba(160, 174, 192, 0.1);
+  --chart-line-1: #2563eb;
+  --chart-line-2: #dc2626;
+  --chart-line-3: #16a34a;
+  --chart-grid: rgba(0, 0, 0, 0.05);
 }
 
-/* Global Dark Theme Application */
+/* Global Light Theme Application */
 * {
   margin: 0;
   padding: 0;
@@ -54,11 +62,9 @@
 html,
 body,
 #root {
-  background-color: var(--dark-bg-primary);
+  background-color: var(--light-bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,16 +76,16 @@ body,
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--dark-bg-secondary);
+  background: var(--light-bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-light);
+  background: var(--border-medium);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-cyan);
+  background: var(--accent-blue);
 }
 
 /* Text Utility Classes */
@@ -117,37 +123,38 @@ body,
 
 /* Background Utility Classes */
 .bg-primary {
-  background-color: var(--dark-bg-primary);
+  background-color: var(--light-bg-primary);
 }
 
 .bg-secondary {
-  background-color: var(--dark-bg-secondary);
+  background-color: var(--light-bg-secondary);
 }
 
 .bg-tertiary {
-  background-color: var(--dark-bg-tertiary);
+  background-color: var(--light-bg-tertiary);
 }
 
 .bg-card {
-  background-color: var(--dark-bg-card);
+  background-color: var(--light-bg-card);
 }
 
 /* Card Styling */
 .card {
-  background-color: var(--dark-bg-card);
-  border: 1px solid var(--border-dark);
+  background-color: var(--light-bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 20px;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-md);
 }
 
 .card-elevated {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Button Styling */
@@ -169,22 +176,34 @@ body,
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
   color: white;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(99, 102, 255, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-  background-color: var(--dark-bg-tertiary);
+  background-color: var(--light-bg-secondary);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
 }
 
 .btn-secondary:hover {
-  background-color: var(--dark-bg-card);
-  border-color: var(--accent-cyan);
+  background-color: var(--light-bg-tertiary);
+  border-color: var(--accent-blue);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--text-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--text-primary);
+  color: white;
 }
 
 .btn-small {
@@ -204,9 +223,9 @@ input[type='email'],
 input[type='password'],
 textarea,
 select {
-  background-color: var(--dark-bg-tertiary);
+  background-color: var(--light-bg-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-dark);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 0.95rem;
@@ -221,8 +240,8 @@ input[type='password']:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--info-light);
 }
 
 /* Badge Styling */
@@ -237,27 +256,27 @@ select:focus {
 }
 
 .badge-success {
-  background-color: rgba(34, 197, 94, 0.2);
+  background-color: var(--success-light);
   color: var(--success-color);
-  border: 1px solid var(--success-color);
+  border: 1px solid #86efac;
 }
 
 .badge-error {
-  background-color: rgba(239, 68, 68, 0.2);
+  background-color: var(--error-light);
   color: var(--error-color);
-  border: 1px solid var(--error-color);
+  border: 1px solid #fca5a5;
 }
 
 .badge-warning {
-  background-color: rgba(245, 158, 11, 0.2);
+  background-color: var(--warning-light);
   color: var(--warning-color);
-  border: 1px solid var(--warning-color);
+  border: 1px solid #fcd34d;
 }
 
 .badge-info {
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--info-light);
   color: var(--info-color);
-  border: 1px solid var(--info-color);
+  border: 1px solid #93c5fd;
 }
 
 /* Utility Spacing Classes */

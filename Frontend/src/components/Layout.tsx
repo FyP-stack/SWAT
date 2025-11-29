@@ -1,5 +1,7 @@
 import React from 'react';
 import Sidebar from './Dashboard/Sidebar';
+import Navbar from './Navbar';
+import Footer from './Footer';
 import './Layout.css';
 
 interface LayoutProps {
@@ -9,12 +11,16 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="layout-container">
-      <Sidebar />
-      <main className="layout-main">
-        <div className="layout-content">
-          {children}
-        </div>
-      </main>
+      <Navbar />
+      <div className="layout-wrapper">
+        <Sidebar />
+        <main className="layout-main">
+          <div className="layout-content">
+            {children}
+          </div>
+        </main>
+      </div>
+      <Footer />
     </div>
   );
 };

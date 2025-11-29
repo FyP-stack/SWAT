@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { LogIn, Mail, Lock } from 'lucide-react';
 import './Auth.css';
 
 const Login = () => {
@@ -37,36 +38,46 @@ const Login = () => {
       <div className="form-section">
         <div className="auth-card">
           <div className="auth-header">
-            <div className="auth-logo">💧</div>
-            <h1 className="auth-title">Sign in to SWaT</h1>
+            <div className="auth-logo">
+              <Lock size={48} />
+            </div>
+            <h1 className="auth-title sky">Sign In to SWaT</h1>
             <p className="auth-subtitle">Access secure water monitoring</p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="operator@swat.com"
-                required
-                disabled={loading}
-              />
+              <label htmlFor="email">Email Address</label>
+              <div className="input-wrapper">
+                <Mail size={18} className="input-icon" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="operator@swat.com"
+                  required
+                  disabled={loading}
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                disabled={loading}
-              />
+              <div className="input-wrapper">
+                <Lock size={18} className="input-icon" />
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={loading}
+                  className="input-with-icon"
+                />
+              </div>
             </div>
 
             {error && <div className="auth-error">{error}</div>}
@@ -78,7 +89,10 @@ const Login = () => {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                <>
+                  <LogIn size={18} />
+                  Sign In
+                </>
               )}
             </button>
           </form>

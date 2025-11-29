@@ -1,18 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { UserPlus, Mail, Lock, User, Check, X } from 'lucide-react';
 import './Auth.css';
 
 function strengthChecks(pw: string) {
   return {
-    length: pw.length >= 10,
+    length: pw.length >= 8,
     upper: /[A-Z]/.test(pw),
     lower: /[a-z]/.test(pw),
     digit: /\d/.test(pw),
-    special: /[^A-Za-z0-9]/.test(pw),
+    special: /[!@#$%^&*()_\-+=[\]{}|;:,.<>?]/.test(pw),
     space: !/\s/.test(pw),
   };
 }
+
 function score(pw: string) {
   const c = strengthChecks(pw);
   return ['length','upper','lower','digit','special','space'].reduce((s,k)=> s + (c as any)[k], 0);
@@ -21,8 +23,7 @@ function score(pw: string) {
 export default function Signup() {
   const { signup } = useAuth();
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName,  setLastName]  = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [confirm, setConfirm]     = useState('');
@@ -38,27 +39,25 @@ export default function Signup() {
     setError('');
     setSuccess(false);
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('Please enter your first and last name.');
+    if (!fullName.trim()) {
+      setError('Please enter your full name.');
       return;
     }
     if (password !== confirm) {
       setError('Passwords do not match.');
       return;
     }
-    if (pct < 84) {
-      setError('Choose a stronger password (meet all listed requirements).');
+    if (pct < 67) {
+      setError('Choose a stronger password (meet requirements).');
       return;
     }
 
-    const result = await signup(email.trim(), password);
+    const result = await signup(email.trim(), password, fullName);
     if (!result.ok) {
       setError(result.reason || 'Could not create account.');
       return;
     }
-    // Show success message; keep user on signup page unauthenticated.
     setSuccess(true);
-    // Optionally clear password fields:
     setPassword('');
     setConfirm('');
   };
@@ -66,85 +65,115 @@ export default function Signup() {
 return (
   <div className="auth-wrapper">   
     {/* LEFT SIDE — SIGNUP FORM */}
-    <div className="auth-left">
+    <div className="form-section">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo">💧</div>
-          <h1 className="auth-title">Create account</h1>
-          <p className="auth-subtitle">Access SWaT anomaly detection</p>
+          <div className="auth-logo">
+            <UserPlus size={48} />
+          </div>
+          <h1 className="auth-title sky">Create Account</h1>
+          <p className="auth-subtitle">Join SWaT anomaly detection</p>
         </div>
 
         <form onSubmit={onSubmit} className="auth-form">
           <div className="form-group">
-            <label>First name</label>
-            <input
-              type="text"
-              required
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              placeholder="Jane"
-              autoComplete="given-name"
-            />
+            <label htmlFor="fullname">Full Name</label>
+            <div className="input-wrapper">
+              <User size={18} className="input-icon" />
+              <input
+                id="fullname"
+                type="text"
+                required
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                placeholder="Jane Doe"
+                autoComplete="name"
+                className="input-with-icon"
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Last name</label>
-            <input
-              type="text"
-              required
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              placeholder="Doe"
-              autoComplete="family-name"
-            />
+            <label htmlFor="email">Email</label>
+            <div className="input-wrapper">
+              <Mail size={18} className="input-icon" />
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                autoComplete="email"
+                className="input-with-icon"
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              autoComplete="email"
-            />
+            <label htmlFor="password">Password</label>
+            <div className="input-wrapper">
+              <Lock size={18} className="input-icon" />
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="StrongP@ssw0rd!"
+                autoComplete="new-password"
+                className="input-with-icon"
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="StrongP@ssw0rd!"
-              autoComplete="new-password"
-            />
-          </div>
-
-          <div className="form-group">
-            <div className="pwmeter"><div className="bar" style={{ width: pct + '%' }} /></div>
+            <div className="pwmeter">
+              <div className="bar" style={{ width: pct + '%' }} />
+            </div>
             <ul className="pwtips">
-              <li className={checks.length ? 'ok':'no'}>At least 10 characters</li>
-              <li className={checks.lower ? 'ok':'no'}>Lowercase letter</li>
-              <li className={checks.special ? 'ok':'no'}>Special character</li>
-              <li className={checks.upper ? 'ok':'no'}>Uppercase letter</li>
-              <li className={checks.digit ? 'ok':'no'}>Digit</li>
-              <li className={checks.space ? 'ok':'no'}>No spaces</li>
+              <li className={checks.length ? 'ok':'no'}>
+                {checks.length ? <Check size={14} /> : <X size={14} />}
+                At least 8 characters
+              </li>
+              <li className={checks.lower ? 'ok':'no'}>
+                {checks.lower ? <Check size={14} /> : <X size={14} />}
+                Lowercase letter
+              </li>
+              <li className={checks.special ? 'ok':'no'}>
+                {checks.special ? <Check size={14} /> : <X size={14} />}
+                Special character
+              </li>
+              <li className={checks.upper ? 'ok':'no'}>
+                {checks.upper ? <Check size={14} /> : <X size={14} />}
+                Uppercase letter
+              </li>
+              <li className={checks.digit ? 'ok':'no'}>
+                {checks.digit ? <Check size={14} /> : <X size={14} />}
+                Digit (0-9)
+              </li>
+              <li className={checks.space ? 'ok':'no'}>
+                {checks.space ? <Check size={14} /> : <X size={14} />}
+                No spaces
+              </li>
             </ul>
           </div>
 
           <div className="form-group">
-            <label>Confirm Password</label>
-            <input
-              type="password"
-              required
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              placeholder="Repeat password"
-              autoComplete="new-password"
-            />
+            <label htmlFor="confirm">Confirm Password</label>
+            <div className="input-wrapper">
+              <Lock size={18} className="input-icon" />
+              <input
+                id="confirm"
+                type="password"
+                required
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                className="input-with-icon"
+              />
+            </div>
           </div>
 
           {error && <div className="auth-error">{error}</div>}
@@ -154,18 +183,21 @@ return (
             </div>
           )}
 
-          <button className="auth-btn" type="submit">Create Account</button>
+          <button className="auth-button" type="submit">
+            <UserPlus size={18} />
+            Create Account
+          </button>
         </form>
 
         <div className="auth-bottom-row corner">
           <span className="auth-info-highlight">Already have an account?</span>
-          <Link to="/login" className="auth-btn auth-create-one-btn">Sign in</Link>
+          <Link to="/login" className="auth-button auth-create-one-btn">Sign in</Link>
         </div>
       </div>
     </div>
 
     {/* RIGHT SIDE — IMAGE */}
-    <div className="auth-right">
+    <div className="image-section">
       <img
         className="auth-image"
         src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=80"

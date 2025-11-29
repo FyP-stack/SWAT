@@ -129,6 +129,51 @@ export const batchEvaluate = async (
   }
 };
 
+// Save evaluation result to database
+export const saveEvaluation = async (
+  token: string,
+  evaluation: EvaluationResult,
+  fileName: string,
+  notes?: string
+): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('model_name', evaluation.model_name);
+    formData.append('model_type', evaluation.model_type || '');
+    formData.append('accuracy', evaluation.accuracy.toString());
+    formData.append('precision', evaluation.precision.toString());
+    formData.append('recall', evaluation.recall.toString());
+    formData.append('f1_score', evaluation.f1.toString());
+    formData.append('threshold_used', (evaluation.threshold_used || 0).toString());
+    formData.append('confusion_matrix', JSON.stringify(evaluation.confusion_matrix));
+    formData.append('class_labels', JSON.stringify(evaluation.class_labels || []));
+    formData.append('curves_data', JSON.stringify(evaluation.curves || {}));
+    formData.append('n_samples', (evaluation.n_rows || evaluation.total_samples || 0).toString());
+    formData.append('n_anomalies', (evaluation.anomalies_detected || 0).toString());
+    formData.append('file_name', fileName);
+    formData.append('raw_score_summary', JSON.stringify(evaluation.raw_score_summary || {}));
+    formData.append('evaluation_notes', notes || '');
+
+    const response = await fetch(`${API_BASE_URL}/api/save-evaluation`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to save evaluation');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error saving evaluation:', error);
+    throw error;
+  }
+};
+
 // Create apiService object for backward compatibility
 export const apiService = {
   fetchModels,
@@ -141,18 +186,21 @@ export const apiService = {
     return evaluateModel(modelName, file, labelColumn, positiveLabel);
   },
   batchEvaluate,
+  saveEvaluation,
 };
 
 // Authentication functions
 export const authApi = {
   login: async (email: string, password: string) => {
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
 
     if (!response.ok) {
@@ -163,14 +211,17 @@ export const authApi = {
     return response.json();
   },
 
-  signup: async (email: string, password: string) => {
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-
+  signup: async (email: string, password: string, fullName?: string) => {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: fullName || '',
+      }),
     });
 
     if (!response.ok) {

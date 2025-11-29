@@ -1,10 +1,19 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Droplet,
+  AlertTriangle,
+  FileText,
+  Settings,
+  HelpCircle,
+} from 'lucide-react';
+import { MdOutlineDashboard, MdOutlineWaterDrop, MdOutlineNotifications, MdOutlineDescription, MdOutlineSettings, MdOutlineHelp } from 'react-icons/md';
 import './Sidebar.css';
 
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   description?: string;
 }
 
@@ -12,15 +21,52 @@ const navSections = [
   {
     title: 'Main',
     items: [
-      { path: '/dashboard', label: 'Dashboard', icon: '📊', description: 'View all models' },
+      {
+        path: '/dashboard',
+        label: 'Dashboard',
+        icon: <MdOutlineDashboard size={20} />,
+        description: 'View all models',
+      },
     ],
   },
   {
-    title: 'Evaluation',
+    title: 'Monitoring',
     items: [
-      { path: '/sensors', label: 'Sensors', icon: '🔌', description: 'Sensor data' },
-      { path: '/alerts', label: 'Alerts', icon: '⚠️', description: 'Alert history' },
-      { path: '/reports', label: 'Reports', icon: '📋', description: 'Generate reports' },
+      {
+        path: '/sensors',
+        label: 'Sensors',
+        icon: <MdOutlineWaterDrop size={20} />,
+        description: 'Sensor data',
+      },
+      {
+        path: '/alerts',
+        label: 'Alerts',
+        icon: <MdOutlineNotifications size={20} />,
+        description: 'Alert history',
+      },
+      {
+        path: '/reports',
+        label: 'Reports',
+        icon: <MdOutlineDescription size={20} />,
+        description: 'View reports',
+      },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      {
+        path: '/settings',
+        label: 'Settings',
+        icon: <MdOutlineSettings size={20} />,
+        description: 'System settings',
+      },
+      {
+        path: '/help',
+        label: 'Help',
+        icon: <MdOutlineHelp size={20} />,
+        description: 'Documentation',
+      },
     ],
   },
 ];
@@ -39,10 +85,10 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <span className="logo-icon">🛡️</span>
-          <h1>SWaT</h1>
+          <span className="logo-icon">⚡</span>
+          <h1>SWAT</h1>
         </div>
-        <p className="sidebar-tagline">Anomaly Detection</p>
+        <p className="sidebar-tagline">Detection System</p>
       </div>
 
       <nav className="sidebar-nav">
@@ -70,7 +116,7 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <div className="sidebar-footer-content">
           <p className="footer-text">v1.0.0</p>
-          <p className="footer-caption">SWaT Monitoring System</p>
+          <p className="footer-caption">Anomaly Detection</p>
         </div>
       </div>
     </aside>
